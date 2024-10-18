@@ -1,0 +1,67 @@
+`timescale 1ns / 1ps
+
+module SingleCycleRiscV_tb;
+
+// Inputs
+reg clk;
+reg reset;
+
+// Outputs
+/*wire [31:0] pc;
+wire [31:0] instruction;
+wire [31:0] aluResult;
+wire branch;
+wire zero;*/
+
+// Instantiate the Unit Under Test (UUT)
+SingleCycleRiscV uut (
+    .clk(clk), 
+    .reset(reset)
+   /* .pc(pc), 
+    .instruction(instruction),
+    .aluResult(aluResult),
+    .branch(branch),
+    .zero(zero)*/
+);
+
+// Clock generation
+always #5 clk = ~clk;
+
+// Initialize and provide stimulus
+initial begin
+    // Initialize Inputs
+    clk = 0;
+    reset = 1;
+
+    // Wait for global reset
+    #10;
+    reset = 0;
+
+    // Manually load instructions into instruction memory
+      //jal 0(offset)    ->start from pc=0
+    // Run for some clock cycles
+    #100;
+
+    // Display final register values
+    $display("Final Register Values:");
+    for (integer i = 0; i < 32; i = i + 1) begin
+        $display(" x%0d: %d", i, uut.id_stage.register_file.regFile[i]);
+    end
+
+    // Display final memory values
+    $display("Final Memory Values:");
+    for (integer i = 0; i < 32; i = i + 1) begin
+        $display(" Mem[%0d]: %d", i, uut.mem_stage.dataMem[i]);
+    end
+
+    // Finish simulation
+    $finish;
+end
+
+// Monitor PC, instruction, ALU result, branch, and zero signals
+initial begin
+    $monitor("Time: %d, PC: %d, Instruction: %b, ALU Result: %h, Branch: %b,Jump :%b,jumpback:%b, Zero: %b",
+             $time, uut.pcReg, uut.instruction, uut.aluResult, uut.branch,uut.jump,uut.jumpback, uut.zero);
+end
+
+endmodule
